@@ -618,15 +618,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
 
 [[package]]
-name = "hurB"
-version = "0.1.0"
-dependencies = [
- "evdev",
- "nokhwa",
- "tensorflow",
-]
-
-[[package]]
 name = "image"
 version = "0.24.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1402,6 +1393,15 @@ name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
+
+[[package]]
+name = "visible"
+version = "0.1.0"
+dependencies = [
+ "evdev",
+ "nokhwa",
+ "tensorflow",
+]
 
 [[package]]
 name = "wasi"

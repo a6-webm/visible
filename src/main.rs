@@ -1,6 +1,6 @@
 extern crate tensorflow;
 
-use std::error::Error;
+use std::{error::Error, time::Instant};
 
 use nokhwa::{
     pixel_format::RgbFormat,
@@ -37,19 +37,20 @@ fn main() -> Result<(), Box<dyn Error>> {
     let op_out = graph.operation_by_name_required("StatefulPartitionedCall")?;
     let context = Context::new(ContextOptions::new())?;
 
+    let mut timer;
+
     camera.open_stream().unwrap();
     loop {
+        timer = Instant::now();
         let frame = camera.frame();
         match frame {
             Ok(f) => {
-                // let buf = f.decode_image::<RgbFormat>().unwrap();
                 let img;
                 unsafe {
-                    let buf = String::from_utf8_unchecked(f.buffer_bytes().into()); // TODO does this have to explicitly be a 0D tensor or does it take care of that for us?
+                    let buf = String::from_utf8_unchecked(f.buffer_bytes().into());
                     img =
                         raw_ops::expand_dims(&context, &raw_ops::decode_jpeg(&context, &buf)?, &0)?;
                 }
-                // let mut mn_in = rgb_buf_to_tensor(buf.into_raw(), IMG_W as u64, IMG_H as u64);
                 let boxes = Tensor::new(&[1, 4])
                     .with_values(&[
                         0_f32,
@@ -82,7 +83,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                     args.fetch(f_tok)?
                 };
                 println!(
-                    "y: {}\nx: {}",
+                    "delta: {:?}\ny: {}\nx: {}",
+                    timer.elapsed(),
                     mn_out.get(&[0, 0, 0, 0]),
                     mn_out.get(&[0, 0, 0, 1])
                 );
@@ -92,10 +94,6 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
         }
     }
+    #[allow(unreachable_code)]
     Ok(())
-}
-
-fn rgb_buf_to_tensor(img: Vec<u8>, w: u64, h: u64) -> Tensor<i32> {
-    let v: Vec<i32> = img.into_iter().map(|x| x as i32).collect();
-    Tensor::new(&[w, h, 3]).with_values(&v).unwrap()
 }
